@@ -1,0 +1,33 @@
+import numpy as np
+import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.preprocessing import LabelEncoder
+
+
+train_data = pd.read_csv('train_data.txt', delimiter=' ::: ', header=None, names=['ID', 'TITLE', 'GENRE', 'DESCRIPTION'])
+
+
+train_movie_plots = train_data['DESCRIPTION'].tolist()
+train_genres = train_data['GENRE'].tolist()
+
+
+label_encoder = LabelEncoder()
+encoded_train_genres = label_encoder.fit_transform(train_genres)
+
+
+tfidf_vectorizer = TfidfVectorizer(max_features=1000)  
+X_train = tfidf_vectorizer.fit_transform(train_movie_plots)
+
+
+classifier = MultinomialNB()
+classifier.fit(X_train, encoded_train_genres)
+
+
+user_input = input("Enter a movie plot summary: ")
+user_input_tfidf = tfidf_vectorizer.transform([user_input])
+
+predicted_label = classifier.predict(user_input_tfidf)
+predicted_genre = label_encoder.inverse_transform(predicted_label)[0]
+
+print(f"The predicted genre for the given plot is: {predicted_genre}")
